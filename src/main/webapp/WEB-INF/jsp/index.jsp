@@ -10,7 +10,7 @@
 <body>
 <div class="container">
     <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand">U.S. Financial Market Tracker</a>
+        <a class="navbar-brand">U.S. Market Tracker</a>
         <form method="get" action="/get/" class="form-inline">
             <input class="form-control mr-sm-2" type="search" placeholder="Enter Ticker Symbol" aria-label="Search" name="ticker">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
