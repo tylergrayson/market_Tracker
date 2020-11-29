@@ -1,24 +1,23 @@
 package net.tylergrayson.market_tracker;
 
 
+import net.tylergrayson.market_tracker.Models.Quote;
+import net.tylergrayson.market_tracker.Models.QuoteRepository;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
-
 
 @Controller
 public class MainController {
 
+    @Autowired
+    private QuoteRepository quoteRepository;
 
     @RequestMapping("/")
     public ModelAndView doHome() {
@@ -27,14 +26,17 @@ public class MainController {
         return mv;
     }
 
+    // Make request to API when search button is clicked
     @RequestMapping(value = "/get", method = RequestMethod.GET)
-    public ModelAndView get(@RequestParam("ticker") String ticker) throws JSONException {
+    public ModelAndView get(@RequestParam("ticker") String ticker) {
         ModelAndView mv = new ModelAndView("redirect:/");
 
-        String quote = getCompanyByName(ticker);
+        RestConnect connect = new RestConnect();
+        String response = connect.requestData(ticker);
+
+        // Parse JSONObject to get needed attributes
         try {
-            JSONObject json = new JSONObject(quote);
-            System.out.println(json);
+            JSONObject json = new JSONObject(response);
             mv.addObject("symbol", json.getJSONObject("quotes").getJSONObject("quote").get("symbol").toString());
             mv.addObject("description", json.getJSONObject("quotes").getJSONObject("quote").get("description").toString());
             mv.addObject("last", json.getJSONObject("quotes").getJSONObject("quote").get("last").toString());
@@ -47,6 +49,21 @@ public class MainController {
             mv.addObject("week_52_high", json.getJSONObject("quotes").getJSONObject("quote").get("week_52_high").toString());
             mv.addObject("week_52_low", json.getJSONObject("quotes").getJSONObject("quote").get("week_52_low").toString());
 
+            // Data model to represent JSONObject
+            Quote userQuote = new Quote();
+            userQuote.setSymbol(json.getJSONObject("quotes").getJSONObject("quote").get("symbol").toString());
+            userQuote.setCompanyName(json.getJSONObject("quotes").getJSONObject("quote").get("description").toString());
+            userQuote.setLastPrice(json.getJSONObject("quotes").getJSONObject("quote").get("last").toString());
+            userQuote.setDaysChange(json.getJSONObject("quotes").getJSONObject("quote").get("change").toString());
+            userQuote.setVolume(json.getJSONObject("quotes").getJSONObject("quote").get("volume").toString());
+            userQuote.setOpen(json.getJSONObject("quotes").getJSONObject("quote").get("open").toString());
+            userQuote.setHigh(json.getJSONObject("quotes").getJSONObject("quote").get("high").toString());
+            userQuote.setLow(json.getJSONObject("quotes").getJSONObject("quote").get("low").toString());
+            userQuote.setChangePercentage(json.getJSONObject("quotes").getJSONObject("quote").get("change_percentage").toString());
+            userQuote.setFiftyTwoWeekHigh(json.getJSONObject("quotes").getJSONObject("quote").get("week_52_high").toString());
+            userQuote.setFiftyTwoWeekLow(json.getJSONObject("quotes").getJSONObject("quote").get("week_52_low").toString());
+            quoteRepository.save(userQuote);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -54,35 +71,13 @@ public class MainController {
         return mv;
     }
 
+    // Request to Database to display all results in table
+    @RequestMapping ("/table")
+    public ModelAndView loadTable() {
+        ModelAndView mv = new ModelAndView("table");
 
-    private String getCompanyByName(String name) {
-
-        try {
-            // MAKE REQUEST TO API
-            URL url = new URL("https://sandbox.tradier.com/v1/markets/quotes?symbols=" + name);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Authorization", "Bearer UhKJjaXbWBOWtqk9mHTuWI6Gg2A9");
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.connect();
-
-            // GET INPUT STREAM RESPONSE FROM REQUEST
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
-
-            // TAKING BITS AND BYTES FROM BUFFERED READER TO BUILD IT INTO A STRING OBJECT
-            StringBuilder json = new StringBuilder();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                json.append(line);
-            }
-            br.close();
-            return json.toString();
-
-
-        } catch (Exception ex) {
-            return ex.getMessage();
-        }
+        mv.addObject("quotesList", quoteRepository.findAll());
+        return mv;
     }
 }
 

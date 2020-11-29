@@ -4,7 +4,6 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <title>Spring Boot Market Tracker</title>
 </head>
@@ -22,7 +21,9 @@
         <p class="lead">This app will give you up-to-date market information about a security of your choosing.</p>
         <hr class="my-4">
         <p>Many cool things went into the completion of this fun homework assignment for my advanced Java class.<br>
-        Search up top for one of your favorite companies!</p>
+            Search up top for one of your favorite companies!</p>
+        <p>Heads Up! In case you aren't familiar with ticker symbols, here are a few popular companies you can try:
+            <strong>AAPL, TSLA, GOOG, MSFT</strong></p>
     </div>
 
     <table class="table table-bordered table-dark">
@@ -71,7 +72,7 @@
             <td>$ <%=request.getParameter("week_52_low")%></td>
         </tr>
     </table>
-    <a href="#" class="btn btn-dark btn-lg" data-toggle="button" role="button" aria-pressed="false">Load Quote</a>
+    <a href="/table/" class="btn btn-dark btn-lg" role="button" name="load">Load Quotes</a>
 </div>
 </body>
 </html>
